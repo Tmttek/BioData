@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZHOID-2026-002 · Pipeline QA Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead__code">ZHOID-2026-002 · CENTRAL AFRICAN REPUBLIC</div>
+  <h1>Pipeline QA Console</h1>
+  <p class="masthead__sub">
+    The same checks that gate <code>weather.py → lagged.py → lagged_to_wide.py → merge.py</code>,
+    run on your files, in memory — nothing is written to disk.
+  </p>
+  <div class="masthead__meta">
+    <span class="dot"></span><span id="store-status">checking data store…</span>
+    <span class="sep">·</span> 9 districts · 113 epi weeks · 4 stages
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="panel__head">
+      <span class="panel__num">01</span>
+      <h2>Load pipeline files</h2>
+      <span class="panel__hint">any subset — missing stages are skipped, not failed</span>
+    </div>
+    <form id="upload-form">
+      <div class="slots">
+        <label class="slot"><span class="slot__stage">stage 1</span>
+          <span class="slot__label">weather_records_openmeteo.csv</span>
+          <input type="file" name="weather" accept=".csv">
+          <span class="slot__chosen">No file selected</span></label>
+        <label class="slot"><span class="slot__stage">stage 2a</span>
+          <span class="slot__label">weather_lagged_features_openmeteo.csv</span>
+          <input type="file" name="lagged_long" accept=".csv">
+          <span class="slot__chosen">No file selected</span></label>
+        <label class="slot"><span class="slot__stage">stage 2b</span>
+          <span class="slot__label">weather_lagged_features_wide.csv</span>
+          <input type="file" name="lagged_wide" accept=".csv">
+          <span class="slot__chosen">No file selected</span></label>
+        <label class="slot"><span class="slot__stage">surveillance</span>
+          <span class="slot__label">malaria_surveillance_synthetic.csv</span>
+          <input type="file" name="surveillance" accept=".csv">
+          <span class="slot__chosen">No file selected</span></label>
+        <label class="slot"><span class="slot__stage">stage 3</span>
+          <span class="slot__label">outbreak_dataset_v1.csv</span>
+          <input type="file" name="merged" accept=".csv">
+          <span class="slot__chosen">No file selected</span></label>
+      </div>
+      <button id="run-btn" class="run-btn" type="submit">Run checks ▸</button>
+    </form>
+    <p id="form-error" class="form-error" hidden></p>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <span class="panel__num">02</span><h2>Results</h2>
+    </div>
+    <div id="results-empty" class="results-empty">No run yet — load at least one CSV above.</div>
+    <div id="results-content" hidden>
+      <div id="overall-stamp" class="stamp pass">PASS</div>
+      <div id="stage-list" class="stage-list"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__head">
+      <span class="panel__num">03</span><h2>Full run log</h2>
+      <button id="download-log" class="download-btn" type="button">Download .log</button>
+    </div>
+    <pre id="log-text" class="log-text">—</pre>
+  </section>
+</main>
+
+<footer class="foot">
+  read-only data API at <a href="/docs">/docs</a> · datasets reload via <code>POST /api/reload</code>
+</footer>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
