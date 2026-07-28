@@ -1,0 +1,78 @@
+{
+  "weather_records": {
+    "file": "weather_records_openmeteo.csv",
+    "key": ["district_id", "week_start"],
+    "fields": {
+      "district_id": {"type": "string", "required": true},
+      "week_start": {"type": "date", "format": "YYYY-MM-DD", "required": true},
+      "rainfall_mm": {"type": "float", "min": 0, "required": true},
+      "rainfall_anomaly_mm": {"type": "float", "required": false},
+      "rainfall_cum4wk_mm": {"type": "float", "min": 0, "required": true, "notes": "first 3 weeks per district are null"},
+      "temp_max_c": {"type": "float", "min": -5, "max": 50, "required": true},
+      "temp_min_c": {"type": "float", "min": -5, "max": 50, "required": true},
+      "temp_mean_c": {"type": "float", "min": -5, "max": 50, "required": true},
+      "humidity_pct": {"type": "float", "min": 0, "max": 100, "required": false},
+      "soil_moisture_pct": {"type": "float", "min": 0, "max": 100, "required": false},
+      "wind_speed_kmh": {"type": "float", "min": 0, "required": false}
+    }
+  },
+  "malaria_surveillance": {
+    "file": "malaria_surveillance_synthetic.csv",
+    "key": ["district_id", "week_start"],
+    "fields": {
+      "district_id": {"type": "string", "required": true},
+      "week_start": {"type": "date", "format": "YYYY-MM-DD", "required": true},
+      "confirmed_cases": {"type": "integer", "min": 0, "required": true},
+      "suspected_cases": {"type": "integer", "min": 0, "required": true},
+      "deaths": {"type": "integer", "min": 0, "required": true, "constraint": "<= confirmed_cases"},
+      "tests_performed": {"type": "integer", "min": 0, "required": true},
+      "test_positivity_rate": {"type": "float", "min": 0, "max": 100, "required": true, "derived": "confirmed_cases / tests_performed * 100"},
+      "cases_lag1wk": {"type": "integer", "min": 0, "required": false, "derived": "shift(1) of confirmed_cases"},
+      "cases_lag2wk": {"type": "integer", "min": 0, "required": false, "derived": "shift(2) of confirmed_cases"},
+      "cases_lag4wk": {"type": "integer", "min": 0, "required": false, "derived": "shift(4) of confirmed_cases"},
+      "cases_ma4wk": {"type": "float", "min": 0, "required": false, "derived": "rolling(4).mean() of confirmed_cases"},
+      "seasonal_trend_index": {"type": "float", "min": 0, "max": 100, "required": false}
+    }
+  },
+  "weather_lagged_features_long": {
+    "file": "weather_lagged_features_openmeteo.csv",
+    "key": ["district_id", "week_start", "base_variable", "lag_weeks"],
+    "fields": {
+      "district_id": {"type": "string", "required": true},
+      "week_start": {"type": "date", "format": "YYYY-MM-DD", "required": true},
+      "base_variable": {
+        "type": "category", "required": true,
+        "allowed_values": ["rainfall_mm", "rainfall_anomaly_mm", "rainfall_cum4wk_mm",
+                           "temp_max_c", "temp_min_c", "temp_mean_c",
+                           "humidity_pct", "soil_moisture_pct", "wind_speed_kmh"]
+      },
+      "lag_weeks": {"type": "integer", "required": true, "allowed_values": [1, 2, 4, 6, 8]},
+      "value": {"type": "float", "required": true, "notes": "range/unit matches base_variable in weather_records"}
+    }
+  },
+  "weather_lagged_features_wide": {
+    "file": "weather_lagged_features_wide.csv",
+    "key": ["district_id", "week_start"],
+    "fields": {
+      "district_id": {"type": "string", "required": true},
+      "week_start": {"type": "date", "format": "YYYY-MM-DD", "required": true},
+      "{base_variable}_lag{N}wk": {
+        "type": "float", "required": false,
+        "pattern": "45 columns: 9 base_variable values x lag N in {1,2,4,6,8}",
+        "notes": "null where district history is shorter than the lag (plus 3wk warm-up for rainfall_cum4wk_mm columns)"
+      }
+    }
+  },
+  "outbreak_dataset_v1": {
+    "file": "outbreak_dataset_v1.csv",
+    "key": ["district_id", "week_start"],
+    "derivation": "inner join of weather_records + weather_lagged_features_wide + malaria_surveillance on (district_id, week_start); rows with null confirmed_cases dropped",
+    "fields": {
+      "district_id": {"type": "string", "required": true},
+      "week_start": {"type": "date", "format": "YYYY-MM-DD", "required": true},
+      "[9 weather_records fields]": {"type": "float", "required": true, "notes": "see weather_records schema"},
+      "[45 lagged feature fields]": {"type": "float", "required": false, "notes": "see weather_lagged_features_wide schema"},
+      "[10 malaria_surveillance fields]": {"type": "mixed", "required": true, "notes": "see malaria_surveillance schema; confirmed_cases required"}
+    }
+  }
+}

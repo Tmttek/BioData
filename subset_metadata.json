@@ -1,0 +1,112 @@
+[
+  {
+    "subset": "weather_records",
+    "file": "weather_records_openmeteo.csv",
+    "title": "Weekly weather records \u2014 10 pilot districts",
+    "description": "Weekly weather variables per district: rainfall, temperature, humidity, soil moisture, wind speed, plus a 4-week cumulative rainfall sum and a rainfall anomaly.",
+    "source": "Open-Meteo Historical Weather API (ERA5/ERA5-Land), district centroid coordinates",
+    "timestamp": {
+      "collection_start": "2024-01-01T00:00:00+02:00",
+      "collection_end": "2025-12-31T23:59:59+02:00"
+    },
+    "license": "Open-Meteo data is open access; internal pilot use",
+    "language_tags": ["en"],
+    "geographic_coverage": "10 pilot districts (see dataset_metadata.json)",
+    "temporal_coverage": "2024-01-01 to 2025-12-31, weekly",
+    "data_type": "tabular (CSV)",
+    "data_sensitivity": "public",
+    "consent_status": "not_required",
+    "quality_summary": "1,050 records (10 districts x 105 weeks). Passes dq_checks.check_ingestion: required columns present, dates parse and fall on Mondays, no duplicate (district_id, week_start), no infinite values, rainfall_cum4wk_mm matches rolling 4-week sum with exactly 3 warm-up NaNs per district.",
+    "bias_and_coverage_notes": "Reanalysis-derived, so spatially gap-free even for districts without a nearby ZMS station; coarser resolution than a ground station network. Intended as a gap-filler alongside ZMS data, not a replacement for it.",
+    "version": "v1.0.0-pilot",
+    "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+  },
+  {
+    "subset": "malaria_surveillance",
+    "file": "malaria_surveillance_synthetic.csv",
+    "title": "Weekly malaria surveillance \u2014 synthetic pilot stand-in",
+    "description": "Weekly confirmed/suspected cases, deaths, tests performed, test positivity, and case-based lag/moving-average features per district. This file is a synthetic stand-in generated to exercise the pipeline and schema ahead of real MoHCC IDSR/DHIS2 data access.",
+    "source": "Synthetic generator (pilot placeholder); real source per the proposal is MoHCC IDSR/DHIS2 (SRC-01) and NMCP (SRC-02)",
+    "timestamp": {
+      "collection_start": "2024-01-01T00:00:00+02:00",
+      "collection_end": "2025-12-31T23:59:59+02:00"
+    },
+    "license": "Synthetic data, internal pilot use only \u2014 not for release",
+    "language_tags": ["en"],
+    "geographic_coverage": "10 pilot districts (see dataset_metadata.json)",
+    "temporal_coverage": "2024-01-01 to 2025-12-31, weekly",
+    "data_type": "tabular (CSV)",
+    "data_sensitivity": "public (synthetic; no real patient or facility data)",
+    "consent_status": "not_required (synthetic data)",
+    "quality_summary": "1,050 records. NOTE: replace with real IDSR/DHIS2 extract before final handover; synthetic values are illustrative only and must not be presented as real surveillance figures.",
+    "bias_and_coverage_notes": "Synthetic generation does not yet model real reporting gaps, facility-level underreporting, or cross-border/migrant undercounts described in the proposal's known-limitations section.",
+    "version": "v0.1.0-synthetic",
+    "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+  },
+  {
+    "subset": "weather_lagged_features_long",
+    "file": "weather_lagged_features_openmeteo.csv",
+    "title": "Lagged weather features \u2014 long/tidy format",
+    "description": "One row per (district, week, base weather variable, lag) with the base variable's value from that many weeks earlier. Long/tidy format chosen over a fixed wide schema so it pivots cleanly into any ML feature matrix.",
+    "source": "Derived from weather_records via Stage 2a of the pipeline",
+    "timestamp": {
+      "collection_start": "2024-01-01T00:00:00+02:00",
+      "collection_end": "2025-12-31T23:59:59+02:00"
+    },
+    "license": "Derived data, internal pilot use",
+    "language_tags": ["en"],
+    "geographic_coverage": "10 pilot districts (see dataset_metadata.json)",
+    "temporal_coverage": "2024-01-01 to 2025-12-31, weekly",
+    "data_type": "tabular (CSV, long/tidy)",
+    "data_sensitivity": "public",
+    "consent_status": "not_required",
+    "quality_summary": "45,211 rows (9 base variables x 5 lags x districts x available weeks, less warm-up). Passes dq_checks.check_lagged_long: expected columns present, base_variable values restricted to the 9 weather fields, lag_weeks restricted to {1,2,4,6,8}, no duplicate (district_id, week_start, base_variable, lag_weeks).",
+    "bias_and_coverage_notes": "Row count per (district, variable, lag) is exactly max(n_weeks - lag - warmup, 0); shorter district histories yield fewer early lagged rows, which is expected and not a data-quality defect.",
+    "version": "v1.0.0-pilot",
+    "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+  },
+  {
+    "subset": "weather_lagged_features_wide",
+    "file": "weather_lagged_features_wide.csv",
+    "title": "Lagged weather features \u2014 wide/pivoted format",
+    "description": "The long lagged-features table pivoted to one column per (base_variable, lag) pair \u2014 45 feature columns plus district_id and week_start. Generated as a convenience feature matrix for direct model input; the long format remains the canonical stored representation.",
+    "source": "Derived from weather_lagged_features_long via Stage 2b of the pipeline",
+    "timestamp": {
+      "collection_start": "2024-01-01T00:00:00+02:00",
+      "collection_end": "2025-12-31T23:59:59+02:00"
+    },
+    "license": "Derived data, internal pilot use",
+    "language_tags": ["en"],
+    "geographic_coverage": "10 pilot districts (see dataset_metadata.json)",
+    "temporal_coverage": "2024-01-01 to 2025-12-31, weekly",
+    "data_type": "tabular (CSV, wide)",
+    "data_sensitivity": "public",
+    "consent_status": "not_required",
+    "quality_summary": "1,040 rows x 47 columns. Passes dq_checks.check_lagged_wide: expected columns present, no duplicate (district_id, week_start), row count consistent with the long file's distinct keys.",
+    "bias_and_coverage_notes": "Cells are null wherever a given district/week doesn't have enough history for that lag; this is expected near the start of each district's series, not a missingness defect.",
+    "version": "v1.0.0-pilot",
+    "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+  },
+  {
+    "subset": "outbreak_dataset",
+    "file": "outbreak_dataset_v1.csv",
+    "title": "Merged model-ready outbreak dataset",
+    "description": "Inner join of weather_records, weather_lagged_features_wide, and malaria_surveillance on (district_id, week_start) \u2014 the single feature-and-label table intended for early-warning model training and evaluation. Not yet listed in the proposal's Section 3.1 schema table; should be added there as an eleventh linked table.",
+    "source": "Derived (merge) from weather_records, weather_lagged_features_wide, and malaria_surveillance",
+    "timestamp": {
+      "collection_start": "2024-01-01T00:00:00+02:00",
+      "collection_end": "2025-12-31T23:59:59+02:00"
+    },
+    "license": "Derived data, internal pilot use",
+    "language_tags": ["en"],
+    "geographic_coverage": "10 pilot districts (see dataset_metadata.json)",
+    "temporal_coverage": "2024-01-01 to 2025-12-31, weekly",
+    "data_type": "tabular (CSV, wide, ~66 columns)",
+    "data_sensitivity": "public (aggregate; surveillance columns are synthetic in this pilot bundle)",
+    "consent_status": "not_required",
+    "quality_summary": "1,050 rows x 66 columns pre-merge; rows with a null confirmed_cases are dropped after the join. Passes dq_checks.check_merge: no duplicate (district_id, week_start), no overlapping non-key columns between inputs, weather columns in the merged table match their source values.",
+    "bias_and_coverage_notes": "Inherits every bias/coverage caveat of its three source tables above, most importantly that malaria_surveillance is currently synthetic.",
+    "version": "v1.0.0-pilot",
+    "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+  }
+]

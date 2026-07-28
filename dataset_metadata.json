@@ -1,0 +1,20 @@
+{
+  "title": "Zimbabwe Malaria Early Warning Intelligence Dataset \u2014 Pilot Pipeline Bundle (v1.0.0)",
+  "description": "Working pilot bundle for the weather \u2194 malaria-surveillance early-warning pipeline: raw weather (Open-Meteo ERA5/ERA5-Land), a synthetic stand-in for malaria surveillance, long- and wide-format lagged weather features (1/2/4/6/8-week lags), and a merged model-ready outbreak dataset. Corresponds to dimensions A (surveillance) and B (weather) of the full nine-dimension dataset described in the AI4I Track 1 Data proposal (ZHOID-2026-002); dimensions C\u2013I are not yet represented in this bundle.",
+  "source": "Open-Meteo Historical Weather API (ERA5/ERA5-Land reanalysis) for weather; synthetic generator (scripts/generate_synthetic_weather.py-style stand-in) for surveillance pending real MoHCC IDSR/DHIS2 data access",
+  "timestamp": {
+    "collection_start": "2024-01-01T00:00:00+02:00",
+    "collection_end": "2025-12-31T23:59:59+02:00"
+  },
+  "license": "Internal pilot / development bundle \u2014 not yet released. Final release license per the proposal: CC BY 4.0 for anonymised aggregates (dimensions A\u2013H); dimension I under community-governed access agreement.",
+  "language_tags": ["en"],
+  "geographic_coverage": "10 pilot districts across 5 provinces: Muzarabani (MZB), Mbire (MBR), Guruve (GRV), Hurungwe (HRG), Kariba (KRB), Binga (BNG), Chiredzi (CHR), Chipinge (CHP), Mutasa (MTS), Nyanga (NYG)",
+  "temporal_coverage": "2024-01-01 to 2025-12-31 (weekly, epi-week Monday start). Note: the AI4I proposal (Section 2.3) commits to a 2019\u20132025 historical range for dimensions A\u2013H; this pilot bundle currently covers a 2-year subset of that range and should be extended before final handover.",
+  "data_type": "tabular (CSV)",
+  "data_sensitivity": "public (aggregate weather and surveillance data); the malaria_surveillance table in this bundle is synthetic and contains no real patient or facility data",
+  "consent_status": "not_required \u2014 weather data is open-access reanalysis; surveillance data in this bundle is synthetic and does not represent real individuals or facilities",
+  "quality_summary": "Automated QA gate (dq_checks.py) checks required columns, date parsing, weekday alignment, duplicate keys, infinite/missing values, and rolling-sum integrity at each pipeline stage; see subset_metadata.json for per-table pass criteria.",
+  "bias_and_coverage_notes": "Weather uses Open-Meteo/ERA5 reanalysis as a gap-filling source; the proposal's primary weather source of record remains Zimbabwe Meteorological Services (ZMS) station data, not yet integrated in this bundle. Surveillance data here is synthetic and does not yet reflect real reporting patterns, gaps, or cross-border undercounts described in the proposal.",
+  "version": "v1.0.0-pilot",
+  "contact_or_steward": "Tamiriraishe Tekede, Lead Innovator, BioData Zimbabwe"
+}
